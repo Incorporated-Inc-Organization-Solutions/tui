@@ -1,0 +1,19 @@
+## .NET build artifacts
+bin/
+obj/
+*.user
+
+## Visual Studio
+.vs/
+.vscode/
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider
+.idea/
+
+## Misc
+*.log
+.DS_Store
+Thumbs.db

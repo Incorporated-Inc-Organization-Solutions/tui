@@ -1,0 +1,668 @@
+@namespace tui.Components.Sales
+
+<div class="kl-page">
+    <div class="kl-header">
+        <div>
+            <h1 class="kl-title">Klanten</h1>
+            <p class="kl-sub">@KlantenData.Length klanten in het systeem</p>
+        </div>
+        <button class="btn btn-primary">+ Nieuwe Klant</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="kl-filters">
+        <input type="text" placeholder="Zoek klanten..." @bind="Zoek" @bind:event="oninput" class="input w56" />
+        <div class="filter-group">
+            @foreach (var s in StatusFilters)
+            {
+                <button class="filter-btn @(FilterStatus == s ? "filter-btn-active" : "")"
+                        @onclick="() => FilterStatus = s">
+                    @s
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="kl-grid">
+        @for (var i = 0; i < Gefilterd.Count(); i++)
+        {
+            var k = Gefilterd.ElementAt(i);
+            var kleur = AvatarColor(i);
+            <div class="kl-card" @onclick="() => Geselecteerd = k">
+                <div class="kl-top">
+                    <div class="kl-avatar" style="background: @kleur;">@Initials(k.Naam)</div>
+                    <div class="kl-idinfo">
+                        <div class="kl-namewrap">
+                            <p class="kl-name">@k.Naam</p>
+                            <span class="badge @StatusKleur(k.Status)">@k.Status</span>
+                        </div>
+                        <p class="kl-email">@k.Email</p>
+                    </div>
+                </div>
+
+                <div class="kl-stats">
+                    <div class="kl-stat">
+                        <p class="kl-stat-label">Boekingen</p>
+                        <p class="kl-stat-value">@k.Boekingen</p>
+                    </div>
+                    <div class="kl-stat">
+                        <p class="kl-stat-label">Lid sinds</p>
+                        <p class="kl-stat-value">@k.LidSinds</p>
+                    </div>
+                    <div class="kl-stat">
+                        <p class="kl-stat-label">Woonplaats</p>
+                        <p class="kl-stat-value">@k.Woonplaats</p>
+                    </div>
+                </div>
+
+                <div class="kl-foot">
+                    <div class="kl-int">
+                        @foreach (var intt in k.Interesses)
+                        {
+                            <span class="kl-int-tag">@intt</span>
+                        }
+                    </div>
+                    <span class="kl-totaal mono">@k.TotaalUitgegeven</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Detail panel -->
+    @if (Geselecteerd is not null)
+    {
+        var idx = Array.IndexOf(KlantenData, Geselecteerd);
+        var kleur = AvatarColor(idx);
+        <div class="drawer-backdrop" @onclick="() => Geselecteerd = null">
+            <div class="drawer" @onclick.stop>
+                <div class="drawer-banner" style="background: @kleur;">
+                    <button class="drawer-banner-x" @onclick="() => Geselecteerd = null">×</button>
+                </div>
+
+                <div class="drawer-content">
+                    <div class="drawer-idrow">
+                        <div class="drawer-avatar" style="background: @kleur;">@Initials(Geselecteerd.Naam)</div>
+                        <div>
+                            <h2 class="drawer-name">@Geselecteerd.Naam</h2>
+                            <span class="badge @StatusKleur(Geselecteerd.Status)">@Geselecteerd.Status</span>
+                        </div>
+                    </div>
+
+                    <div class="drawer-list">
+                        <div class="drawer-row"><span class="row-label">E-mail</span><span class="row-value">@Geselecteerd.Email</span></div>
+                        <div class="drawer-row"><span class="row-label">Telefoon</span><span class="row-value">@Geselecteerd.Telefoon</span></div>
+                        <div class="drawer-row"><span class="row-label">Woonplaats</span><span class="row-value">@Geselecteerd.Woonplaats</span></div>
+                        <div class="drawer-row"><span class="row-label">Lid sinds</span><span class="row-value">@Geselecteerd.LidSinds</span></div>
+                        <div class="drawer-row"><span class="row-label">Laatste contact</span><span class="row-value">@Geselecteerd.LaatsteContact</span></div>
+                    </div>
+
+                    <div class="drawer-cards">
+                        <div class="drawer-card">
+                            <p class="drawer-card-label">Boekingen</p>
+                            <p class="drawer-card-value">@Geselecteerd.Boekingen</p>
+                        </div>
+                        <div class="drawer-card">
+                            <p class="drawer-card-label">Uitgegeven</p>
+                            <p class="drawer-card-value primary">@Geselecteerd.TotaalUitgegeven</p>
+                        </div>
+                    </div>
+
+                    <div class="drawer-int">
+                        <p class="drawer-int-label">Interesses</p>
+                        <div class="drawer-int-tags">
+                            @foreach (var intt in Geselecteerd.Interesses)
+                            {
+                                <span class="drawer-int-tag">@intt</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="drawer-actions">
+                        <button class="wfull btn-primary-full">Offerte Aanmaken</button>
+                        <button class="wfull btn-ghost-full">Contact Opnemen</button>
+                        <button class="wfull btn-ghost-full">Klant Bewerken</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private sealed record Klant(string Id, string Naam, string Email, string Telefoon, string Woonplaats, int Boekingen, string TotaalUitgegeven, string LidSinds, string Status, string[] Interesses, string LaatsteContact);
+
+    private static readonly string[] StatusFilters = { "alle", "actief", "vip", "nieuw", "prospect" };
+
+    private static readonly string[] AvatarColors = { "#ff5c35", "#4a90d9", "#22c55e", "#f59e0b", "#8b5cf6", "#ec4899" };
+
+    private static readonly Klant[] KlantenData =
+    {
+        new("KL-1001", "Lena Hartman", "l.hartman@gmail.com", "+31 6 12 34 56 78", "Amsterdam", 3, "€ 9.720", "jan 2024", "actief", new[] { "avontuur", "trekking" }, "22 aug 2026"),
+        new("KL-1002", "Daan Mulder", "d.mulder@outlook.com", "+31 6 23 45 67 89", "Utrecht", 2, "€ 5.780", "mrt 2024", "actief", new[] { "cultuur", "steden" }, "20 aug 2026"),
+        new("KL-1003", "Sofie Bakker", "s.bakker@hotmail.com", "+31 6 34 56 78 90", "Rotterdam", 4, "€ 14.200", "nov 2023", "vip", new[] { "natuur", "actief" }, "18 aug 2026"),
+        new("KL-1004", "Tim de Vries", "t.devries@gmail.com", "+31 6 45 67 89 01", "Den Haag", 1, "€ 3.960", "jun 2025", "nieuw", new[] { "solo", "natuur" }, "15 aug 2026"),
+        new("KL-1005", "Emma Smit", "emma.smit@gmail.com", "+31 6 56 78 90 12", "Eindhoven", 2, "€ 6.350", "feb 2024", "actief", new[] { "cultuur", "eten" }, "12 aug 2026"),
+        new("KL-1006", "Lars Brouwer", "l.brouwer@icloud.com", "+31 6 67 89 01 23", "Groningen", 5, "€ 19.800", "sep 2023", "vip", new[] { "avontuur", "groep" }, "10 aug 2026"),
+        new("KL-1007", "Nina Oost", "n.oost@gmail.com", "+31 6 78 90 12 34", "Haarlem", 2, "€ 6.480", "apr 2025", "actief", new[] { "trekking", "solo" }, "8 aug 2026"),
+        new("KL-1008", "Mia Jansen", "mia.jansen@gmail.com", "+31 6 89 01 23 45", "Maastricht", 0, "€ 0", "aug 2026", "prospect", new[] { "cultuur" }, "28 aug 2026"),
+    };
+
+    private string FilterStatus { get; set; } = "alle";
+    private string Zoek { get; set; } = string.Empty;
+    private Klant? Geselecteerd { get; set; }
+
+    private IEnumerable<Klant> Gefilterd =>
+        KlantenData.Where(k =>
+            (FilterStatus == "alle" || k.Status == FilterStatus) &&
+            (k.Naam.Contains(Zoek, StringComparison.OrdinalIgnoreCase) ||
+             k.Email.Contains(Zoek, StringComparison.OrdinalIgnoreCase) ||
+             k.Woonplaats.Contains(Zoek, StringComparison.OrdinalIgnoreCase)));
+
+    private static string Initials(string naam)
+    {
+        var parts = naam.Split(' ').Select(n => n.Length > 0 ? n[0].ToString() : "").ToArray();
+        return string.Concat(parts).Substring(0, Math.Min(2, parts.Length)).ToUpperInvariant();
+    }
+
+    private static string AvatarColor(int index) => AvatarColors[((index % AvatarColors.Length) + AvatarColors.Length) % AvatarColors.Length];
+
+    private static string StatusKleur(string status) => status switch
+    {
+        "actief" => "badge-blue",
+        "vip" => "badge-amber",
+        "nieuw" => "badge-green",
+        "prospect" => "badge-muted",
+        _ => "badge-muted",
+    };
+}
+
+<style>
+    .kl-page {
+        padding: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .kl-page {
+            padding: 2rem;
+        }
+    }
+
+    .kl-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .kl-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.875rem;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .kl-sub {
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .btn {
+        padding: 0.625rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: rgba(255, 92, 53, 0.9);
+    }
+
+    .kl-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .input {
+        padding: 0.5rem 0.75rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--foreground);
+    }
+
+    .input::placeholder {
+        color: var(--muted-foreground);
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .w56 {
+        width: 14rem;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        text-transform: capitalize;
+        transition: all 150ms ease;
+    }
+
+    .filter-btn:hover {
+        color: var(--foreground);
+    }
+
+    .filter-btn-active {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .filter-btn-active:hover {
+        color: #fff;
+    }
+
+    .kl-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @@media (min-width: 640px) {
+        .kl-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (min-width: 1280px) {
+        .kl-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .kl-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: border-color 150ms ease;
+    }
+
+    .kl-card:hover {
+        border-color: rgba(255, 92, 53, 0.4);
+    }
+
+    .kl-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .kl-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .kl-idinfo {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .kl-namewrap {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .kl-name {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: var(--foreground);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kl-email {
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .badge {
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        border: 1px solid transparent;
+        font-size: 9px;
+        font-weight: 500;
+        text-transform: capitalize;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+
+    .badge-blue {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .badge-amber {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-green {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border-color: rgba(34, 197, 94, 0.2);
+    }
+
+    .badge-muted {
+        background: var(--muted);
+        color: var(--muted-foreground);
+    }
+
+    .kl-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .kl-stat-label {
+        font-size: 9px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.125rem 0;
+    }
+
+    .kl-stat-value {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .kl-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .kl-int {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .kl-int-tag {
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        background: var(--secondary);
+        font-size: 9px;
+        color: var(--muted-foreground);
+    }
+
+    .kl-totaal {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--foreground);
+    }
+
+    .mono {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Drawer */
+    .drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .drawer {
+        background: var(--card);
+        border-left: 1px solid var(--border);
+        width: 100%;
+        max-width: 24rem;
+        height: 100%;
+        overflow: auto;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .drawer-banner {
+        position: relative;
+        height: 6rem;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .drawer-banner-x {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 0.25rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .drawer-banner-x:hover {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .drawer-content {
+        padding: 0 1.25rem 1.5rem 1.25rem;
+    }
+
+    .drawer-idrow {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.75rem;
+        margin: -1.25rem 0 1rem 0;
+    }
+
+    .drawer-avatar {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        border: 2px solid var(--card);
+        color: #fff;
+        font-size: 0.875rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .drawer-name {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: var(--foreground);
+        margin: 0;
+        line-height: 1.25;
+    }
+
+    .drawer-list {
+        margin-bottom: 1.25rem;
+    }
+
+    .drawer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .drawer-row:last-child {
+        border-bottom: none;
+    }
+
+    .row-label {
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+    }
+
+    .row-value {
+        font-size: 0.875rem;
+        color: var(--foreground);
+        text-align: right;
+    }
+
+    .drawer-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .drawer-card {
+        background: var(--secondary);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .drawer-card-label {
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .drawer-card-value {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .drawer-card-value.primary {
+        font-size: 0.875rem;
+        color: var(--primary);
+    }
+
+    .drawer-int {
+        margin-bottom: 1.25rem;
+    }
+
+    .drawer-int-label {
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .drawer-int-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+
+    .drawer-int-tag {
+        padding: 0.25rem 0.625rem;
+        border-radius: 0.25rem;
+        background: var(--secondary);
+        font-size: 0.75rem;
+        color: var(--foreground);
+        text-transform: capitalize;
+    }
+
+    .drawer-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .wfull {
+        width: 100%;
+        padding: 0.625rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+    }
+
+    .btn-primary-full {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+    }
+
+    .btn-primary-full:hover {
+        background: rgba(255, 92, 53, 0.9);
+    }
+
+    .btn-ghost-full {
+        background: var(--secondary);
+        color: var(--foreground);
+        border: 1px solid var(--border);
+    }
+
+    .btn-ghost-full:hover {
+        background: var(--muted);
+    }
+</style>
