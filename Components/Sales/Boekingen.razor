@@ -1,0 +1,647 @@
+@namespace tui.Components.Sales
+
+<div class="bk-page">
+    <div class="bk-header">
+        <div>
+            <h1 class="bk-title">Boekingen</h1>
+            <p class="bk-sub">@BoekingenData.Length boekingen — Totale waarde: € @TotaalOmzet.ToString("N0", new System.Globalization.CultureInfo("nl-NL"))</p>
+        </div>
+        <button class="btn btn-primary">+ Nieuwe Boeking</button>
+    </div>
+
+    <!-- Status summary -->
+    <div class="bk-summary">
+        @foreach (var s in StatusFilters)
+        {
+            var count = s == "alle" ? BoekingenData.Length : BoekingenData.Count(b => b.Status == s);
+            <button class="sum-card @(FilterStatus == s ? "sum-card-active" : "")"
+                    @onclick="() => FilterStatus = s">
+                <p class="sum-label @(s != "alle" ? "cap" : "")">@(s == "alle" ? "Alle" : s)</p>
+                <p class="sum-value @(FilterStatus == s ? "sum-value-active" : "")">@count</p>
+            </button>
+        }
+    </div>
+
+    <!-- Search -->
+    <div class="bk-search">
+        <input type="text" placeholder="Zoek op naam, reis of ID..." @bind="Zoek" @bind:event="oninput" class="input w64" />
+    </div>
+
+    <!-- Table -->
+    <div class="bk-table card">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Boeking</th>
+                        <th>Klant</th>
+                        <th>Reis</th>
+                        <th>Vertrek</th>
+                        <th>Personen</th>
+                        <th>Bedrag</th>
+                        <th>Betaald</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Gefilterd)
+                    {
+                        var pct = BetaalPct(b);
+                        <tr class="table-row" @onclick="() => Geselecteerd = b">
+                            <td class="cell mono muted">@b.Id</td>
+                            <td class="cell name">@b.Klant</td>
+                            <td class="cell nowrap">@b.Reis</td>
+                            <td class="cell muted nowrap">@b.Vertrek</td>
+                            <td class="cell center muted">@b.Personen</td>
+                            <td class="cell mono nowrap">@b.Bedrag</td>
+                            <td class="cell">
+                                <div class="pay">
+                                    <div class="pay-track">
+                                        <div class="pay-bg" style="width: @pct.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%; background: @(PayColor(pct));"></div>
+                                    </div>
+                                    <span class="mono pct">@Math.Round(pct)%</span>
+                                </div>
+                            </td>
+                            <td class="cell"><span class="badge @StatusKleur(b.Status)">@b.Status</span></td>
+                            <td class="cell">
+                                <button class="mini-btn">Details</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detail drawer -->
+    @if (Geselecteerd is not null)
+    {
+        var gpct = BetaalPct(Geselecteerd);
+        <div class="drawer-backdrop" @onclick="() => Geselecteerd = null">
+            <div class="drawer" @onclick.stop>
+                <div class="drawer-head">
+                    <div>
+                        <p class="drawer-id">@Geselecteerd.Id</p>
+                        <h2 class="drawer-title">@Geselecteerd.Klant</h2>
+                    </div>
+                    <button class="drawer-x" @onclick="() => Geselecteerd = null">×</button>
+                </div>
+
+                <span class="badge badge-lg @StatusKleur(Geselecteerd.Status)">@Geselecteerd.Status</span>
+
+                <div class="drawer-list">
+                    <div class="drawer-row"><span class="row-label">Reis</span><span class="row-value">@Geselecteerd.Reis</span></div>
+                    <div class="drawer-row"><span class="row-label">Vertrek</span><span class="row-value">@Geselecteerd.Vertrek</span></div>
+                    <div class="drawer-row"><span class="row-label">Terugkeer</span><span class="row-value">@Geselecteerd.Terugkeer</span></div>
+                    <div class="drawer-row"><span class="row-label">Personen</span><span class="row-value">@Geselecteerd.Personen</span></div>
+                    <div class="drawer-row"><span class="row-label">Aangemaakt</span><span class="row-value">@Geselecteerd.Aangemaakt</span></div>
+                </div>
+
+                <div class="pay-card">
+                    <p class="pay-card-label">Betaalstatus</p>
+                    <div class="pay-line"><span class="pl">Totaal</span><span class="mono pv">@Geselecteerd.Bedrag</span></div>
+                    <div class="pay-line"><span class="pl">Betaald</span><span class="mono green">@Geselecteerd.Betaald</span></div>
+                    <div class="pay-big">
+                        <div class="pay-bigbg" style="width: @gpct.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%; background: @(PayColor(gpct));"></div>
+                    </div>
+                </div>
+
+                <div class="drawer-actions">
+                    <button class="wfull btn-primary-full">Boeking Bewerken</button>
+                    <button class="wfull btn-ghost-full">Bevestiging Versturen</button>
+                    <button class="wfull btn-danger">Boeking Annuleren</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private sealed record Boeking(string Id, string Klant, string Reis, string Vertrek, string Terugkeer, int Personen, string Bedrag, string Betaald, string Status, string Aangemaakt);
+
+    private static readonly string[] StatusFilters = { "alle", "bevestigd", "in behandeling", "wacht betaling" };
+
+    private static readonly Boeking[] BoekingenData =
+    {
+        new("BK-2847", "Lena Hartman", "Patagonie Trek", "15 mrt 2026", "28 mrt 2026", 1, "€ 3.240", "€ 3.240", "bevestigd", "22 aug 2026"),
+        new("BK-2846", "Daan Mulder", "Japan Rondreis", "22 mrt 2026", "6 apr 2026", 2, "€ 5.780", "€ 2.890", "in behandeling", "20 aug 2026"),
+        new("BK-2845", "Sofie Bakker", "Peru Avontuur", "1 apr 2026", "12 apr 2026", 1, "€ 4.150", "€ 4.150", "bevestigd", "18 aug 2026"),
+        new("BK-2844", "Tim de Vries", "IJsland Ring Road", "8 apr 2026", "17 apr 2026", 2, "€ 3.960", "€ 0", "wacht betaling", "15 aug 2026"),
+        new("BK-2843", "Emma Smit", "Marokko Avontuur", "12 apr 2026", "20 apr 2026", 1, "€ 2.100", "€ 2.100", "bevestigd", "12 aug 2026"),
+        new("BK-2842", "Lars Brouwer", "Japan Rondreis", "19 apr 2026", "4 mei 2026", 3, "€ 8.670", "€ 4.335", "in behandeling", "10 aug 2026"),
+        new("BK-2841", "Nina Oost", "Patagonie Trek", "2 mei 2026", "15 mei 2026", 1, "€ 3.240", "€ 3.240", "bevestigd", "8 aug 2026"),
+        new("BK-2840", "Cas Bergman", "Vietnam Noord-Zuid", "15 mei 2026", "1 jun 2026", 2, "€ 5.300", "€ 0", "geannuleerd", "5 aug 2026"),
+    };
+
+    private string FilterStatus { get; set; } = "alle";
+    private string Zoek { get; set; } = string.Empty;
+    private Boeking? Geselecteerd { get; set; }
+
+    private IEnumerable<Boeking> Gefilterd =>
+        BoekingenData.Where(b =>
+            (FilterStatus == "alle" || b.Status == FilterStatus) &&
+            (b.Klant.Contains(Zoek, StringComparison.OrdinalIgnoreCase) ||
+             b.Reis.Contains(Zoek, StringComparison.OrdinalIgnoreCase) ||
+             b.Id.Contains(Zoek, StringComparison.OrdinalIgnoreCase)));
+
+    private static int BedragInt(string s) => int.Parse(s.Replace("€", "").Replace(".", "").Replace(" ", ""));
+
+    private static double BetaalPct(Boeking b) =>
+        (double)BedragInt(b.Betaald) / BedragInt(b.Bedrag) * 100.0;
+
+    private static string PayColor(double pct) =>
+        pct >= 100 ? "#22c55e" : pct > 0 ? "#f59e0b" : "#ef4444";
+
+    private static string StatusKleur(string status) => status switch
+    {
+        "bevestigd" => "badge-green",
+        "in behandeling" => "badge-amber",
+        "wacht betaling" => "badge-orange",
+        "geannuleerd" => "badge-red",
+        _ => "badge-muted",
+    };
+
+    private int TotaalOmzet =>
+        BoekingenData.Where(b => b.Status != "geannuleerd").Sum(b => BedragInt(b.Bedrag));
+}
+
+<style>
+    .bk-page {
+        padding: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .bk-page {
+            padding: 2rem;
+        }
+    }
+
+    .bk-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .bk-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.875rem;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .bk-sub {
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .btn {
+        padding: 0.625rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: rgba(255, 92, 53, 0.9);
+    }
+
+    .bk-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .bk-summary {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .sum-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        cursor: pointer;
+        transition: border-color 150ms ease;
+    }
+
+    .sum-card:hover {
+        border-color: rgba(255, 92, 53, 0.3);
+    }
+
+    .sum-card-active {
+        border-color: var(--primary);
+    }
+
+    .sum-label {
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .sum-label.cap {
+        text-transform: capitalize;
+    }
+
+    .sum-value {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .sum-value-active {
+        color: var(--primary);
+    }
+
+    .bk-search {
+        margin-bottom: 1rem;
+    }
+
+    .input {
+        padding: 0.5rem 0.75rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--foreground);
+    }
+
+    .input::placeholder {
+        color: var(--muted-foreground);
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .w64 {
+        width: 16rem;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table thead tr {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        white-space: nowrap;
+    }
+
+    .table-row {
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        transition: background-color 150ms ease;
+    }
+
+    .table-row:last-child {
+        border-bottom: none;
+    }
+
+    .table-row:hover {
+        background: var(--secondary);
+    }
+
+    .cell {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        color: var(--foreground);
+    }
+
+    .cell.mono {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+    }
+
+    .cell.name {
+        font-weight: 500;
+    }
+
+    .cell.muted {
+        color: var(--muted-foreground);
+        font-size: 0.75rem;
+    }
+
+    .cell.center {
+        text-align: center;
+    }
+
+    .cell.nowrap {
+        white-space: nowrap;
+    }
+
+    .pay {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pay-track {
+        width: 3rem;
+        height: 4px;
+        background: var(--secondary);
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .pay-bg {
+        height: 100%;
+    }
+
+    .pct {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+    }
+
+    .badge {
+        padding: 0.125rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid transparent;
+        font-size: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .badge-lg {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .badge-green {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border-color: rgba(34, 197, 94, 0.2);
+    }
+
+    .badge-amber {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-orange {
+        background: rgba(255, 92, 53, 0.15);
+        color: var(--primary);
+        border-color: rgba(255, 92, 53, 0.2);
+    }
+
+    .badge-red {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-muted {
+        background: var(--muted);
+        color: var(--muted-foreground);
+    }
+
+    .mini-btn {
+        padding: 0.25rem 0.5rem;
+        background: var(--secondary);
+        color: var(--muted-foreground);
+        border: none;
+        border-radius: 0.25rem;
+        font-size: 10px;
+        cursor: pointer;
+        transition: color 150ms ease;
+    }
+
+    .mini-btn:hover {
+        color: var(--foreground);
+    }
+
+    .mono {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .green {
+        color: #4ade80;
+    }
+
+    /* Drawer */
+    .drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .drawer {
+        background: var(--card);
+        border-left: 1px solid var(--border);
+        width: 100%;
+        max-width: 24rem;
+        height: 100%;
+        overflow: auto;
+        padding: 1.5rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .drawer-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .drawer-id {
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.125rem 0;
+    }
+
+    .drawer-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: var(--foreground);
+        margin: 0;
+    }
+
+    .drawer-x {
+        background: none;
+        border: none;
+        color: var(--muted-foreground);
+        font-size: 1.125rem;
+        cursor: pointer;
+    }
+
+    .drawer-x:hover {
+        color: var(--foreground);
+    }
+
+    .drawer-list {
+        margin-top: 1.25rem;
+    }
+
+    .drawer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .drawer-row:last-child {
+        border-bottom: none;
+    }
+
+    .row-label {
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+    }
+
+    .row-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--foreground);
+    }
+
+    .pay-card {
+        margin-top: 1.25rem;
+        background: var(--secondary);
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    .pay-card-label {
+        font-size: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.75rem 0;
+    }
+
+    .pay-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .pl {
+        font-size: 0.875rem;
+        color: var(--muted-foreground);
+    }
+
+    .pv {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--foreground);
+    }
+
+    .pay-line .green {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .pay-big {
+        height: 8px;
+        background: var(--border);
+        border-radius: 50px;
+        overflow: hidden;
+        margin-top: 0.75rem;
+    }
+
+    .pay-bigbg {
+        height: 100%;
+    }
+
+    .drawer-actions {
+        margin-top: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .wfull {
+        width: 100%;
+        padding: 0.625rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+    }
+
+    .btn-primary-full {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+    }
+
+    .btn-primary-full:hover {
+        background: rgba(255, 92, 53, 0.9);
+    }
+
+    .btn-ghost-full {
+        background: var(--secondary);
+        color: var(--foreground);
+        border: 1px solid var(--border);
+    }
+
+    .btn-ghost-full:hover {
+        background: var(--muted);
+    }
+
+    .btn-danger {
+        background: none;
+        border: none;
+        color: #f87171;
+    }
+
+    .btn-danger:hover {
+        color: #fca5a5;
+    }
+</style>

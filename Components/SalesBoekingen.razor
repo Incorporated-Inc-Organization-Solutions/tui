@@ -1,0 +1,266 @@
+@namespace tui.Components
+
+<div class="sb-root">
+    <!-- Sidebar -->
+    <aside class="sb-sidebar">
+        <div class="sb-sidebar-head">
+            <p class="sb-sidebar-label">Sales & Boekingen</p>
+            <div class="sb-sidebar-line"></div>
+        </div>
+        @foreach (var t in Tabs)
+        {
+            <button class="sb-tab @(ActiveTab == t.Id ? "sb-tab-active" : "")"
+                    @onclick="() => ActiveTab = t.Id">
+                <span class="sb-tab-icon">@t.Icon</span>
+                @t.Label
+            </button>
+        }
+
+        <div class="sb-sidebar-foot">
+            <div class="sb-user">
+                <div class="sb-user-avatar">JV</div>
+                <div>
+                    <p class="sb-user-name">Jana Visser</p>
+                    <p class="sb-user-role">Sales Manager</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile tab strip -->
+    <div class="sb-mobile-tabs">
+        @foreach (var t in Tabs)
+        {
+            <button class="sb-mtab @(ActiveTab == t.Id ? "sb-mtab-active" : "")"
+                    @onclick="() => ActiveTab = t.Id">
+                <span>@t.Icon</span>
+                @t.Label
+            </button>
+        }
+    </div>
+
+    <!-- Content area -->
+    <div class="sb-content">
+        @if (ActiveTab == "dashboard")
+        {
+            <Dashboard />
+        }
+        else if (ActiveTab == "reizen")
+        {
+            <Reizen />
+        }
+        else if (ActiveTab == "offertes")
+        {
+            <Offertes />
+        }
+        else if (ActiveTab == "boekingen")
+        {
+            <Boekingen />
+        }
+        else if (ActiveTab == "klanten")
+        {
+            <Klanten />
+        }
+    </div>
+</div>
+
+@code {
+    private sealed record Tab(string Id, string Label, string Icon);
+
+    private static readonly Tab[] Tabs =
+    {
+        new("dashboard", "Dashboard", "▦"),
+        new("reizen", "Reizen", "✦"),
+        new("offertes", "Offertes", "◈"),
+        new("boekingen", "Boekingen", "◉"),
+        new("klanten", "Klanten", "◎"),
+    };
+
+    private string ActiveTab { get; set; } = "dashboard";
+}
+
+<style>
+    .sb-root {
+        display: flex;
+        height: 100%;
+        min-height: 0;
+    }
+
+    /* Sidebar */
+    .sb-sidebar {
+        display: none;
+        flex-direction: column;
+        width: 13rem;
+        flex-shrink: 0;
+        border-right: 1px solid var(--border);
+        background: var(--card);
+        padding: 1.5rem 0;
+        gap: 0.25rem;
+    }
+
+    @@media (min-width: 768px) {
+        .sb-sidebar {
+            display: flex;
+        }
+    }
+
+    .sb-sidebar-head {
+        padding: 0 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .sb-sidebar-label {
+        font-size: 9px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--muted-foreground);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .sb-sidebar-line {
+        height: 1px;
+        background: var(--border);
+    }
+
+    .sb-tab {
+        margin: 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        text-align: left;
+        transition: all 150ms ease;
+    }
+
+    .sb-tab:hover {
+        color: var(--foreground);
+        background: var(--secondary);
+    }
+
+    .sb-tab-active {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .sb-tab-active:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .sb-tab-icon {
+        font-size: 0.75rem;
+        opacity: 0.7;
+    }
+
+    .sb-sidebar-foot {
+        margin-top: auto;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .sb-user {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.25rem;
+    }
+
+    .sb-user-avatar {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .sb-user-name {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--foreground);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sb-user-role {
+        font-size: 10px;
+        color: var(--muted-foreground);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Mobile tab strip */
+    .sb-mobile-tabs {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+    }
+
+    .sb-mtab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.125rem;
+        padding: 0.5rem 0;
+        font-size: 10px;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        transition: color 150ms ease;
+    }
+
+    .sb-mtab-active {
+        color: var(--primary);
+    }
+
+    .sb-mtab::before {
+        content: "";
+        display: block;
+    }
+
+    @@media (max-width: 767.98px) {
+        .sb-mobile-tabs {
+            display: flex;
+        }
+    }
+
+    /* Content */
+    .sb-content {
+        flex: 1;
+        overflow: auto;
+        padding-bottom: 4rem;
+    }
+
+    @@media (min-width: 768px) {
+        .sb-content {
+            padding-bottom: 0;
+        }
+    }
+</style>

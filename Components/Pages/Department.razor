@@ -1,0 +1,32 @@
+@page "/{DepartementId}"
+@page "/"
+@rendermode InteractiveServer
+
+@if (IsSales)
+{
+    <SalesBoekingen />
+}
+else
+{
+    <ComingSoon Label="@Label" />
+}
+
+@code {
+    [Parameter]
+    public string DepartementId { get; set; } = "sales";
+
+    private bool IsSales => string.IsNullOrEmpty(DepartementId) || DepartementId == "sales";
+
+    private static readonly Dictionary<string, string> Labels = new()
+    {
+        ["marketing"] = "Marketing & Communicatie",
+        ["sales"] = "Sales & Boekingen",
+        ["klantenservice"] = "Klantenservice & Support",
+        ["productontwikkeling"] = "Productontwikkeling & Inkoop",
+        ["financien"] = "Financiën & Administratie",
+        ["it"] = "IT & Innovatie",
+    };
+
+    private string Label =>
+        !string.IsNullOrEmpty(DepartementId) && Labels.TryGetValue(DepartementId, out var l) ? l : "Sales & Boekingen";
+}

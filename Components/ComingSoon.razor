@@ -1,0 +1,68 @@
+@namespace tui.Components
+
+<div class="cs-root">
+    <div class="cs-icon">
+        <span>⊘</span>
+    </div>
+    <div>
+        <h2 class="cs-title font-display">@Label</h2>
+        <p class="cs-desc">Deze sectie is nog niet beschikbaar in de huidige versie van het VoyageVista platform.</p>
+    </div>
+    <div class="cs-badge">BINNENKORT BESCHIKBAAR</div>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+}
+
+<style>
+    .cs-root {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .cs-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cs-icon span {
+        font-size: 1.5rem;
+        color: var(--muted-foreground);
+    }
+
+    .cs-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--foreground);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .cs-desc {
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        max-width: 20rem;
+        margin: 0 auto;
+    }
+
+    .cs-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        border: 1px solid var(--border);
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+        font-family: 'JetBrains Mono', monospace;
+    }
+</style>
