@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html lang="nl">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href="/" />
+        <ResourcePreloader />
+        <link rel="stylesheet" href="@Assets["app.css"]" />
+        <link rel="stylesheet" href="@Assets["tui.styles.css"]" />
+        <ImportMap />
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <HeadOutlet @rendermode="InteractiveServer" />
+    </head>
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["tui.styles.css"]" />
-    <ImportMap />
-    <HeadOutlet />
-</head>
-
-<body>
-    <div id="app">
+    <body>
         <Routes />
-    </div>
-    <ReconnectModal />
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
-</body>
-
+        <ReconnectModal />
+        <script src="@Assets["_framework/blazor.web.js"]"></script>
+    </body>
 </html>
