@@ -1,0 +1,34 @@
+services:
+  mariadb:
+    container_name: mariadb-tui
+    image: mariadb:latest
+    restart: unless-stopped
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: true
+      MARIADB_DATABASE: tui
+      MARIADB_USER: tui
+      MARIADB_PASSWORD: changeme
+      TZ: Europe/Amsterdam
+    volumes:
+      - /DATA/AppData/tui/mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  tui:
+    image: ghcr.io/Incorporated-Inc-Organization-Solutions/tui:latest
+    # build: .
+    container_name: tui
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "4675:8080"
+    environment:
+      - DB__host=mariadb
+      - DB__user=tui
+      - DB__password=changeme
