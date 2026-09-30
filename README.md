@@ -1,24 +1,76 @@
-Installeer dotnet ef
+# TUI
+
+Een .NET 10 Blazor-app met een JSON-API, EF Core en MariaDB. De API ondersteunt testrecords, accountregistratie/inloggen en rolgebaseerd gebruikersbeheer.
+
+## Vereisten
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- Docker Desktop met Docker Compose (voor de lokale database en integratietest)
+- EF CLI voor nieuwe migraties: `dotnet tool install --global dotnet-ef --version 10.0.12`
+
+## Lokaal starten met Docker
+
+De Compose-configuratie bouwt de app uit deze checkout en start een alleen intern bereikbare MariaDB-container. De testdatabase gebruikt bewust de ingecheckte testgegevens; gebruik dit bestand niet voor productie.
+
 ```bash
-dotnet tool install --global dotnet-ef
+docker compose up --build -d
+docker compose ps
 ```
 
-## Start het project
+Open daarna [http://localhost:4675](http://localhost:4675). De eerste geregistreerde gebruiker ontvangt de rol `Admin`; volgende registraties krijgen de rol `User`. Een admin kan op **Gebruikers** rollen wijzigen.
+
+Stop de lokale omgeving met:
+
 ```bash
+docker compose down
+```
+
+## Zonder Docker starten
+
+Stel de databaseverbinding buiten de repository in met user secrets of omgevingsvariabelen. Een volledige connection string heeft voorrang op de losse `Db`-waarden.
+
+```bash
+dotnet user-secrets set "ConnectionStrings:MariaDb" "Server=localhost;Port=3306;Database=tui;User=tui;Password=vervang-mij"
 dotnet watch
 ```
 
-## Setup database verbinding
-### Als je xampp gebruikt hoef je dit niet te doen.
+Hetzelfde kan via `ConnectionStrings__MariaDb` of via `Db__host`, `Db__port`, `Db__name`, `Db__user` en `Db__password`.
+
+## API
+
+Alle API-fouten zijn `application/problem+json`. Validatiefouten geven `400 Bad Request`; ongeldige inloggegevens geven `401 Unauthorized`; dubbele accounts geven `409 Conflict`.
+
+| Methode | Route | Toegang | Doel |
+| --- | --- | --- | --- |
+| `POST` | `/api/test-records` | publiek | Testrecord opslaan |
+| `GET` | `/api/test-records` | publiek | Testrecords ophalen |
+| `POST` | `/api/auth/register` | publiek | Account registreren |
+| `POST` | `/api/auth/login` | publiek | Inloggen en sessiecookie ontvangen |
+| `POST` | `/api/auth/logout` | ingelogd | Uitloggen |
+| `GET` | `/api/auth/me` | ingelogd | Huidige gebruiker ophalen |
+| `GET` | `/api/users` | Admin | Gebruikersoverzicht ophalen |
+| `PUT` | `/api/users/{id}/role` | Admin | Rol wijzigen naar `User` of `Admin` |
+
+Voorbeeld van een testrecord:
+
 ```bash
-dotnet user-secrets set "Db:password" ""
-dotnet user-secrets set "Db:host" "localhost"
-dotnet user-secrets set "Db:port" 3306
-dotnet user-secrets set "Db:name" "tui"
-dotnet user-secrets set "Db:user" "root"
+curl -X POST http://localhost:4675/api/test-records \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Eerste testrecord"}'
 ```
 
-## Hoe maak je een migratie?
+## Migraties
+
+Migraties worden bij het starten automatisch toegepast. Maak een nieuwe migratie met:
+
 ```bash
 dotnet ef migrations add <naam>
+```
+
+## Integratietest
+
+De integratietest start een tijdelijke MariaDB-container, stuurt een `POST` naar de API en leest het record daarna met `GET` terug. Docker Desktop moet actief zijn.
+
+```bash
+dotnet test tui.IntegrationTests/tui.IntegrationTests.csproj
 ```

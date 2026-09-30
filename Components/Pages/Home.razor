@@ -4,6 +4,22 @@
 <PageTitle>Home</PageTitle>
 
 <div class="main">
-    <h3>Home</h3>
-    <p>Hello, World!</p>
+    <AuthorizeView>
+        <Authorized Context="authState">
+            <h1>Welkom, @authState.User.Identity?.Name</h1>
+            <p>Je bent ingelogd als <strong>@(authState.User.IsInRole("Admin") ? "beheerder" : "gebruiker")</strong>.</p>
+            @if (authState.User.IsInRole("Admin"))
+            {
+                <p><a class="button-link" href="/admin/users">Beheer gebruikers en rollen</a></p>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <h1>Welkom bij TUI</h1>
+            <p>Log in om verder te gaan, of maak een account aan.</p>
+            <p>
+                <a class="button-link" href="/login">Inloggen</a>
+                <a class="button-link secondary" href="/register">Registreren</a>
+            </p>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>

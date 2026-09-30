@@ -1,0 +1,36 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject IJSRuntime JavaScript
+
+<PageTitle>Gebruikersbeheer</PageTitle>
+
+<section class="main">
+    <h1>Gebruikersbeheer</h1>
+    <p>Alleen beheerders kunnen rollen wijzigen.</p>
+    <p id="users-error" class="form-error" aria-live="polite"></p>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Gebruikersnaam</th>
+                    <th>E-mailadres</th>
+                    <th>Rol</th>
+                    <th>Aangemaakt</th>
+                    <th>Actie</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+        </table>
+    </div>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JavaScript.InvokeVoidAsync("tuiAdmin.loadUsers");
+        }
+    }
+}

@@ -1,0 +1,27 @@
+@page "/register"
+
+<PageTitle>Registreren</PageTitle>
+
+<section class="auth-card">
+    <h1>Account aanmaken</h1>
+    <p>Het eerste geregistreerde account ontvangt de beheerdersrol. Alle volgende accounts starten als gebruiker.</p>
+
+    <form onsubmit="return tuiAuth.submit(event, '/api/auth/register', '/login');">
+        <label for="username">Gebruikersnaam</label>
+        <input id="username" name="username" minlength="3" maxlength="50" autocomplete="username" required />
+
+        <label for="email">E-mailadres</label>
+        <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required />
+
+        <label for="new-password">Wachtwoord</label>
+        <input id="new-password" name="password" type="password" minlength="8" maxlength="100" autocomplete="new-password" required />
+
+        <label for="confirm-password">Herhaal wachtwoord</label>
+        <input id="confirm-password" name="confirmPassword" type="password" minlength="8" maxlength="100" autocomplete="new-password" required />
+
+        <p class="form-error" data-form-error aria-live="polite"></p>
+        <button type="submit">Account aanmaken</button>
+    </form>
+
+    <p>Al een account? <a href="/login">Log in.</a></p>
+</section>

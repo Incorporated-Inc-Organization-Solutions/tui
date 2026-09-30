@@ -9,5 +9,19 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> Users => Set<User>();
+
+    public DbSet<TestRecord> TestRecords => Set<TestRecord>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(user => user.Username).IsUnique();
+            entity.HasIndex(user => user.Email).IsUnique();
+            entity.Property(user => user.Role).HasConversion<string>().HasMaxLength(20);
+        });
+    }
 }

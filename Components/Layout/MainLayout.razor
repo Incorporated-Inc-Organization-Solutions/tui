@@ -1,13 +1,30 @@
 ﻿@inherits LayoutComponentBase
 
 <main>
-    <div class="navbar">
-        Navbar
-    </div>
+    <nav class="navbar" aria-label="Hoofdnavigatie">
+        <a class="brand" href="/">TUI</a>
+        <div class="nav-links">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/">Dashboard</a>
+                    <AuthorizeView Roles="Admin" Context="adminAuthenticationState">
+                        <Authorized>
+                            <a href="/admin/users">Gebruikers</a>
+                        </Authorized>
+                    </AuthorizeView>
+                    <form class="nav-form" onsubmit="return tuiAuth.logout(event);">
+                        <button type="submit">Uitloggen</button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login">Inloggen</a>
+                    <a href="/register">Registreren</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </nav>
 
     @Body
 
-    <div class="footer">
-        Footer
-    </div>
+    <footer class="footer">TUI</footer>
 </main>

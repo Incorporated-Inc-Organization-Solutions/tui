@@ -1,0 +1,21 @@
+@page "/login"
+
+<PageTitle>Inloggen</PageTitle>
+
+<section class="auth-card">
+    <h1>Inloggen</h1>
+    <p>Gebruik je e-mailadres of gebruikersnaam en wachtwoord.</p>
+
+    <form onsubmit="return tuiAuth.submit(event, '/api/auth/login', '/');">
+        <label for="identifier">E-mailadres of gebruikersnaam</label>
+        <input id="identifier" name="identifier" autocomplete="username" required />
+
+        <label for="password">Wachtwoord</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+
+        <p class="form-error" data-form-error aria-live="polite"></p>
+        <button type="submit">Inloggen</button>
+    </form>
+
+    <p>Nog geen account? <a href="/register">Registreer je hier.</a></p>
+</section>

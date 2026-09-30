@@ -1,0 +1,74 @@
+:root {
+    color: #1f2937;
+    background: #f8fafc;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+a { color: #1d4ed8; }
+
+.navbar {
+    align-items: center;
+    background: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    min-height: 4rem;
+    padding: 0.75rem max(1.5rem, calc((100% - 70rem) / 2));
+}
+
+.brand, .nav-links a { color: #fff; text-decoration: none; }
+.brand { font-size: 1.25rem; font-weight: 700; }
+.nav-links { align-items: center; display: flex; gap: 1rem; }
+.nav-form { margin: 0; }
+.nav-form button { background: transparent; border: 1px solid #94a3b8; font-size: .9rem; padding: .4rem .7rem; }
+
+.main, .auth-card {
+    margin: 2rem auto;
+    max-width: 70rem;
+    padding: 0 1.5rem;
+}
+
+.auth-card {
+    background: #fff;
+    border: 1px solid #dbe3ef;
+    border-radius: .75rem;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 8%);
+    max-width: 32rem;
+    padding: 2rem;
+}
+
+.auth-card form { display: grid; gap: .55rem; margin: 1.5rem 0; }
+label { font-weight: 600; margin-top: .45rem; }
+input, select {
+    border: 1px solid #94a3b8;
+    border-radius: .35rem;
+    font: inherit;
+    padding: .65rem;
+}
+button, .button-link {
+    background: #2563eb;
+    border: 0;
+    border-radius: .35rem;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: .65rem 1rem;
+    text-decoration: none;
+}
+button:hover, .button-link:hover { background: #1d4ed8; }
+.button-link.secondary { background: #475569; margin-left: .5rem; }
+.form-error { color: #b91c1c; min-height: 1.3rem; }
+
+.table-wrapper { overflow-x: auto; }
+table { background: #fff; border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #dbe3ef; padding: .7rem; text-align: left; }
+th { background: #eaf0ff; }
+
+.footer { color: #64748b; margin: 3rem auto 1rem; max-width: 70rem; padding: 0 1.5rem; }
+
+@media (max-width: 38rem) {
+    .navbar { align-items: flex-start; flex-direction: column; }
+    .nav-links { flex-wrap: wrap; }
+}
