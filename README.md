@@ -1,6 +1,6 @@
 # TUI
 
-Een .NET 10 Blazor-app met een JSON-API, EF Core en MariaDB. De API ondersteunt testrecords, accountregistratie/inloggen en rolgebaseerd gebruikersbeheer.
+Een .NET 10 Blazor-app met een JSON-API, EF Core en MariaDB. De API ondersteunt testrecords, accountregistratie/inloggen, rolgebaseerd gebruikersbeheer en handmatige factuurregistratie.
 
 ## Vereisten
 
@@ -44,6 +44,10 @@ Alle API-fouten zijn `application/problem+json`. Validatiefouten geven `400 Bad 
 | --- | --- | --- | --- |
 | `POST` | `/api/test-records` | publiek | Testrecord opslaan |
 | `GET` | `/api/test-records` | publiek | Testrecords ophalen |
+| `GET` | `/api/recipients` | ingelogd | Bestaande ontvangers ophalen |
+| `POST` | `/api/invoices` | ingelogd | Factuur handmatig opslaan |
+| `GET` | `/api/invoices` | ingelogd | Factuuroverzicht ophalen |
+| `GET` | `/api/invoices/{internalReference}` | ingelogd | Factuur opnieuw openen |
 | `POST` | `/api/auth/register` | publiek | Account registreren |
 | `POST` | `/api/auth/login` | publiek | Inloggen en sessiecookie ontvangen |
 | `POST` | `/api/auth/logout` | ingelogd | Uitloggen |
@@ -59,6 +63,8 @@ curl -X POST http://localhost:4675/api/test-records \
   -d '{"name":"Eerste testrecord"}'
 ```
 
+Een ingelogde medewerker kan in de interface via **Facturen** een factuur vastleggen. Voor lokaal gebruik zijn twee voorbeeldontvangers beschikbaar. Ontvangers aanmaken valt buiten deze applicatiestroom; de factuur kiest altijd een bestaand record.
+
 ## Migraties
 
 Migraties worden bij het starten automatisch toegepast. Maak een nieuwe migratie met:
@@ -69,7 +75,7 @@ dotnet ef migrations add <naam>
 
 ## Integratietest
 
-De integratietest start een tijdelijke MariaDB-container, stuurt een `POST` naar de API en leest het record daarna met `GET` terug. Docker Desktop moet actief zijn.
+De integratietesten starten een tijdelijke MariaDB-container. Zij controleren zowel de testrecord- als de factuurstroom: opslaan via `POST`, ophalen via `GET`, interne referentie en de status `Openstaand`. Docker Desktop moet actief zijn.
 
 ```bash
 dotnet test tui.IntegrationTests/tui.IntegrationTests.csproj

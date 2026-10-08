@@ -1,0 +1,41 @@
+@page "/invoices"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IJSRuntime JavaScript
+
+<PageTitle>Facturen</PageTitle>
+
+<section class="main">
+    <div class="page-heading">
+        <div>
+            <h1>Facturen</h1>
+            <p>Handmatig vastgelegde facturen.</p>
+        </div>
+        <a class="button-link" href="/invoices/new">Nieuwe factuur</a>
+    </div>
+    <p id="invoices-error" class="form-error" aria-live="polite"></p>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Referentie</th>
+                    <th>Ontvanger</th>
+                    <th>Factuurdatum</th>
+                    <th>Totaalbedrag</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="invoices-table-body"></tbody>
+        </table>
+    </div>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JavaScript.InvokeVoidAsync("tuiInvoices.loadList");
+        }
+    }
+}

@@ -39,13 +39,15 @@ a { color: #1d4ed8; }
 }
 
 .auth-card form { display: grid; gap: .55rem; margin: 1.5rem 0; }
+.invoice-form { max-width: 42rem; }
 label { font-weight: 600; margin-top: .45rem; }
-input, select {
+input, select, textarea {
     border: 1px solid #94a3b8;
     border-radius: .35rem;
     font: inherit;
     padding: .65rem;
 }
+textarea { min-height: 8rem; resize: vertical; }
 button, .button-link {
     background: #2563eb;
     border: 0;
@@ -60,6 +62,15 @@ button, .button-link {
 button:hover, .button-link:hover { background: #1d4ed8; }
 .button-link.secondary { background: #475569; margin-left: .5rem; }
 .form-error { color: #b91c1c; min-height: 1.3rem; }
+.field-error { color: #b91c1c; font-size: .9rem; margin: 0; min-height: 1.2rem; }
+
+.page-heading { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1.5rem; }
+.page-heading h1 { margin-bottom: .25rem; }
+.page-heading p { margin-top: 0; }
+.detail-list { display: grid; gap: .75rem; max-width: 44rem; }
+.detail-list div { border-bottom: 1px solid #dbe3ef; padding: .75rem 0; }
+.detail-list dt { color: #475569; font-weight: 700; }
+.detail-list dd { margin: .35rem 0 0; white-space: pre-wrap; }
 
 .table-wrapper { overflow-x: auto; }
 table { background: #fff; border-collapse: collapse; width: 100%; }
@@ -71,4 +82,5 @@ th { background: #eaf0ff; }
 @media (max-width: 38rem) {
     .navbar { align-items: flex-start; flex-direction: column; }
     .nav-links { flex-wrap: wrap; }
+    .page-heading { align-items: flex-start; flex-direction: column; }
 }

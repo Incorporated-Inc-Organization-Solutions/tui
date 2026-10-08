@@ -23,6 +23,25 @@ public static class ApiEndpointExtensions
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+        var recipients = api.MapGroup("/recipients")
+            .WithTags("Ontvangers")
+            .RequireAuthorization();
+        recipients.MapGet("", GetRecipients)
+            .Produces<List<RecipientResponse>>(StatusCodes.Status200OK);
+
+        var invoices = api.MapGroup("/invoices")
+            .WithTags("Facturen")
+            .RequireAuthorization();
+        invoices.MapGet("", GetInvoices)
+            .Produces<List<InvoiceResponse>>(StatusCodes.Status200OK);
+        invoices.MapGet("/{internalReference}", GetInvoice)
+            .Produces<InvoiceResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        invoices.MapPost("", CreateInvoice)
+            .Produces<InvoiceResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         var auth = api.MapGroup("/auth").WithTags("Authenticatie");
         auth.MapPost("/register", Register)
             .Produces<AuthUserResponse>(StatusCodes.Status201Created)
@@ -97,6 +116,97 @@ public static class ApiEndpointExtensions
 
         var response = new TestRecordResponse(record.Id, record.Name, record.CreatedAt);
         return Results.Created($"/api/test-records/{record.Id}", response);
+    }
+
+    private static async Task<IResult> GetRecipients(ApplicationDbContext database, CancellationToken cancellationToken)
+    {
+        var recipients = await database.Recipients
+            .AsNoTracking()
+            .OrderBy(recipient => recipient.Name)
+            .Select(recipient => new RecipientResponse(recipient.Id, recipient.Name))
+            .ToListAsync(cancellationToken);
+
+        return Results.Ok(recipients);
+    }
+
+    private static async Task<IResult> GetInvoices(ApplicationDbContext database, CancellationToken cancellationToken)
+    {
+        var invoices = await database.Invoices
+            .AsNoTracking()
+            .Include(invoice => invoice.Recipient)
+            .OrderByDescending(invoice => invoice.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return Results.Ok(invoices.Select(ToInvoiceResponse).ToList());
+    }
+
+    private static async Task<IResult> GetInvoice(
+        string internalReference,
+        ApplicationDbContext database,
+        CancellationToken cancellationToken)
+    {
+        var invoice = await database.Invoices
+            .AsNoTracking()
+            .Include(candidate => candidate.Recipient)
+            .SingleOrDefaultAsync(candidate => candidate.InternalReference == internalReference, cancellationToken);
+
+        return invoice is null
+            ? Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Factuur niet gevonden.")
+            : Results.Ok(ToInvoiceResponse(invoice));
+    }
+
+    private static async Task<IResult> CreateInvoice(
+        CreateInvoiceRequest request,
+        ApplicationDbContext database,
+        ILoggerFactory loggerFactory,
+        CancellationToken cancellationToken)
+    {
+        var errors = ValidationHelper.Validate(request);
+        if (string.IsNullOrWhiteSpace(request.Description))
+        {
+            errors["Description"] = ["Omschrijving is verplicht."];
+        }
+        if (request.TotalAmount <= 0 || request.TotalAmount > 999_999_999.99m)
+        {
+            errors["TotalAmount"] = ["Totaalbedrag moet groter zijn dan 0 en past niet binnen het toegestane bereik."];
+        }
+
+        var recipient = await database.Recipients.SingleOrDefaultAsync(
+            candidate => candidate.Id == request.RecipientId,
+            cancellationToken);
+        if (recipient is null)
+        {
+            errors["RecipientId"] = ["Kies een bestaande ontvanger."];
+        }
+
+        if (errors.Count > 0)
+        {
+            return Results.ValidationProblem(errors);
+        }
+
+        var invoice = new Invoice
+        {
+            InternalReference = $"FAC-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpperInvariant()}",
+            RecipientId = recipient!.Id,
+            Recipient = recipient,
+            InvoiceDate = request.InvoiceDate!.Value,
+            Description = request.Description!.Trim(),
+            TotalAmount = request.TotalAmount,
+            PaymentStatus = InvoicePaymentStatus.Openstaand
+        };
+        database.Invoices.Add(invoice);
+
+        try
+        {
+            await database.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+        {
+            loggerFactory.CreateLogger("Api").LogError(exception, "Factuur kon niet worden opgeslagen.");
+            return DatabaseProblem();
+        }
+
+        return Results.Created($"/api/invoices/{invoice.InternalReference}", ToInvoiceResponse(invoice));
     }
 
     private static async Task<IResult> Register(
@@ -272,6 +382,18 @@ public static class ApiEndpointExtensions
 
     private static AuthUserResponse ToAuthUserResponse(User user) =>
         new(user.Id, user.Username, user.Email, user.Role);
+
+    private static InvoiceResponse ToInvoiceResponse(Invoice invoice) =>
+        new(
+            invoice.Id,
+            invoice.InternalReference,
+            invoice.RecipientId,
+            invoice.Recipient.Name,
+            invoice.InvoiceDate,
+            invoice.Description,
+            invoice.TotalAmount,
+            invoice.PaymentStatus,
+            invoice.CreatedAt);
 
     private static IResult DatabaseProblem() => Results.Problem(
         statusCode: StatusCodes.Status500InternalServerError,

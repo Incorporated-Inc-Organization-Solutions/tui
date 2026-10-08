@@ -19,6 +19,9 @@
 
   <ItemGroup>
     <Compile Remove="tui.IntegrationTests\**\*.cs" />
+    <Content Remove="tui.IntegrationTests\**" />
+    <EmbeddedResource Remove="tui.IntegrationTests\**" />
+    <None Remove="tui.IntegrationTests\**" />
   </ItemGroup>
 
 </Project>

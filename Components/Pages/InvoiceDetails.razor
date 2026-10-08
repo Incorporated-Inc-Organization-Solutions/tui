@@ -1,0 +1,36 @@
+@page "/invoices/{InternalReference}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IJSRuntime JavaScript
+
+<PageTitle>Factuur</PageTitle>
+
+<section class="main" data-invoice-reference="@InternalReference">
+    <div class="page-heading">
+        <div>
+            <h1>Factuur <span id="invoice-reference">laden…</span></h1>
+            <p id="invoice-detail-error" class="form-error" aria-live="polite"></p>
+        </div>
+        <a href="/invoices">Terug naar overzicht</a>
+    </div>
+    <dl id="invoice-details" class="detail-list" hidden>
+        <div><dt>Ontvanger</dt><dd id="invoice-recipient"></dd></div>
+        <div><dt>Factuurdatum</dt><dd id="invoice-date-value"></dd></div>
+        <div><dt>Omschrijving</dt><dd id="invoice-description"></dd></div>
+        <div><dt>Totaalbedrag</dt><dd id="invoice-total-amount"></dd></div>
+        <div><dt>Betaalstatus</dt><dd id="invoice-status"></dd></div>
+    </dl>
+</section>
+
+@code {
+    [Parameter]
+    public string InternalReference { get; set; } = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JavaScript.InvokeVoidAsync("tuiInvoices.loadDetail", InternalReference);
+        }
+    }
+}

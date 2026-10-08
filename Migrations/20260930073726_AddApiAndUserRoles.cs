@@ -49,7 +49,7 @@ namespace tui.Migrations
                 type: "varchar(512)",
                 maxLength: 512,
                 nullable: false,
-                defaultValue: "User")
+                defaultValue: "")
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddColumn<string>(
@@ -58,7 +58,7 @@ namespace tui.Migrations
                 type: "varchar(20)",
                 maxLength: 20,
                 nullable: false,
-                defaultValue: "")
+                defaultValue: "User")
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(

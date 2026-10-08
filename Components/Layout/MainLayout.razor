@@ -7,6 +7,7 @@
             <AuthorizeView>
                 <Authorized>
                     <a href="/">Dashboard</a>
+                    <a href="/invoices">Facturen</a>
                     <AuthorizeView Roles="Admin" Context="adminAuthenticationState">
                         <Authorized>
                             <a href="/admin/users">Gebruikers</a>

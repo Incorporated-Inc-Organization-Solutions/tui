@@ -1,0 +1,44 @@
+@page "/invoices/new"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IJSRuntime JavaScript
+
+<PageTitle>Nieuwe factuur</PageTitle>
+
+<section class="auth-card invoice-form">
+    <h1>Factuur handmatig vastleggen</h1>
+    <p>Vul de minimale factuurgegevens in. De velden kunnen later met de casus worden uitgebreid.</p>
+
+    <form onsubmit="return tuiInvoices.create(event);">
+        <label for="recipient-id">Ontvanger</label>
+        <select id="recipient-id" name="recipientId" required>
+            <option value="">Ontvangers laden…</option>
+        </select>
+        <p class="field-error" data-field-error="RecipientId" aria-live="polite"></p>
+
+        <label for="invoice-date">Factuurdatum</label>
+        <input id="invoice-date" name="invoiceDate" type="date" required />
+        <p class="field-error" data-field-error="InvoiceDate" aria-live="polite"></p>
+
+        <label for="description">Omschrijving</label>
+        <textarea id="description" name="description" maxlength="1000" required></textarea>
+        <p class="field-error" data-field-error="Description" aria-live="polite"></p>
+
+        <label for="total-amount">Totaalbedrag</label>
+        <input id="total-amount" name="totalAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required />
+        <p class="field-error" data-field-error="TotalAmount" aria-live="polite"></p>
+
+        <p class="form-error" data-form-error aria-live="polite"></p>
+        <button type="submit">Factuur opslaan</button>
+    </form>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JavaScript.InvokeVoidAsync("tuiInvoices.loadForm");
+        }
+    }
+}
