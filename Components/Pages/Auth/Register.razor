@@ -1,0 +1,42 @@
+@page "/auth/register"
+@layout MainLayout
+@inject AuthService AuthService
+
+<PageTitle>Register</PageTitle>
+
+<div class="main">
+    <h3>Register</h3>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <p>@_message</p>
+    }
+
+    <form @onsubmit="OnRegister">
+        <AntiforgeryToken />
+        <input type="text" placeholder="First Name" @bind="_firstName" required />
+        <input type="text" placeholder="Last Name" @bind="_lastName" required />
+        <input type="email" placeholder="Email" @bind="_email" required />
+        <input type="password" placeholder="Password" @bind="_password" required />
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="/auth/login">Login</a></p>
+</div>
+
+@code {
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _email = string.Empty;
+    private string _password = string.Empty;
+    private string? _message;
+
+    private async Task OnRegister()
+    {
+        var result = await AuthService.RegisterAsync(_firstName, _lastName, _email, _password);
+
+        _message = result.Success
+            ? "Registration successful! You can now log in."
+            : $"Registration failed: {result.Error}";
+    }
+}

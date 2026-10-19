@@ -13,14 +13,14 @@ public static class AuthEndpoints
             var result = await auth.LoginAsync(email, password);
 
             return result.Success
-                ? Results.LocalRedirect("/auth")
-                : Results.LocalRedirect($"/auth?error={Uri.EscapeDataString(result.Error ?? "Login failed.")}");
+                ? Results.LocalRedirect("/auth/login")
+                : Results.LocalRedirect($"/auth/login?error={Uri.EscapeDataString(result.Error ?? "Login failed.")}");
         });
 
         group.MapPost("/logout", async (AuthService auth) =>
         {
             await auth.LogoutAsync();
-            return Results.LocalRedirect("/auth");
+            return Results.LocalRedirect("/auth/login");
         });
 
         return app;

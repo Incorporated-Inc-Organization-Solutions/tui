@@ -30,7 +30,7 @@ builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => { options.LoginPath = "/auth"; });
+    .AddCookie(options => { options.LoginPath = "/auth/login"; });
 
 var app = builder.Build();
 

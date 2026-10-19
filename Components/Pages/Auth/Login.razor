@@ -1,0 +1,59 @@
+@page "/auth/login"
+@layout MainLayout
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Login</PageTitle>
+
+<div class="main">
+    <h3>Login</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <p>@Error</p>
+    }
+
+    <form method="post" action="/auth/login">
+        <AntiforgeryToken />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="/auth/register">Register</a></p>
+
+    @if (_isLoggedIn)
+    {
+        <p>You are logged in as <strong>@_firstName @_lastName</strong> (email: @_email)</p>
+        <form method="post" action="/auth/logout">
+            <AntiforgeryToken />
+            <button type="submit">Logout</button>
+        </form>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    private string? Error { get; set; }
+
+    private bool _isLoggedIn;
+    private string? _firstName;
+    private string? _lastName;
+    private string? _email;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        _isLoggedIn = user.Identity?.IsAuthenticated == true;
+
+        if (_isLoggedIn)
+        {
+            _firstName = user.FindFirstValue(ClaimTypes.GivenName);
+            _lastName = user.FindFirstValue(ClaimTypes.Surname);
+            _email = user.FindFirstValue(ClaimTypes.Email);
+        }
+    }
+}
