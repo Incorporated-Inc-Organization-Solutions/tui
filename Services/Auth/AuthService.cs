@@ -20,6 +20,7 @@ public class AuthService(
     public async Task<AuthResult> RegisterAsync(string firstname, string lastname, string email, string password)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
+        email = email.Trim().ToUpperInvariant();
 
         if (await db.Users.AnyAsync(u => u.Email == email))
         {
@@ -38,6 +39,7 @@ public class AuthService(
     public async Task<AuthResult> LoginAsync(string email, string password)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
+        email = email.Trim().ToUpperInvariant();
 
         var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email);
 

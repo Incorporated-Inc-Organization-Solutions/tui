@@ -141,11 +141,20 @@
 }
 
 .main > p {
+    border-radius: 8px;
+    padding: 10px 16px;
+}
+
+.error-message {
     color: #ffb3b3;
     background: rgba(150, 25, 40, 0.35);
     border: 1px solid rgba(255, 100, 100, 0.3);
-    border-radius: 8px;
-    padding: 10px 16px;
+}
+
+.success-message {
+    color: #b7f5c0;
+    background: rgba(25, 150, 70, 0.35);
+    border: 1px solid rgba(100, 255, 130, 0.3);
 }
 
 .main > form button {

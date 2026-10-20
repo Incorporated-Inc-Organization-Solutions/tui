@@ -12,7 +12,7 @@
 
         @if (!string.IsNullOrWhiteSpace(_message))
         {
-            <p>@_message</p>
+            <p class="@(_registrationSucceeded ? "success-message" : "error-message")">@_message</p>
         }
 
         <form @onsubmit="OnRegister">
@@ -20,7 +20,8 @@
             <input type="text" placeholder="First Name" @bind="_firstName" required />
             <input type="text" placeholder="Last Name" @bind="_lastName" required />
             <input type="email" placeholder="Email" @bind="_email" required />
-            <input type="password" placeholder="Password" @bind="_password" required />
+            <input type="password" placeholder="Password (at least 8 characters)" @bind="_password" minlength="8" required />
+            <input type="password" placeholder="Confirm password" @bind="_confirmPassword" minlength="8" required />
             <button type="submit">Register</button>
         </form>
 
@@ -35,12 +36,29 @@
     private string _lastName = string.Empty;
     private string _email = string.Empty;
     private string _password = string.Empty;
+    private string _confirmPassword = string.Empty;
     private string? _message;
+    private bool _registrationSucceeded;
 
     private async Task OnRegister()
     {
+        if (_password.Length < 8)
+        {
+            _registrationSucceeded = false;
+            _message = "Password must be at least 8 characters long.";
+            return;
+        }
+
+        if (_password != _confirmPassword)
+        {
+            _registrationSucceeded = false;
+            _message = "The passwords do not match.";
+            return;
+        }
+
         var result = await AuthService.RegisterAsync(_firstName, _lastName, _email, _password);
 
+        _registrationSucceeded = result.Success;
         _message = result.Success
             ? "Registration successful! You can now log in."
             : $"Registration failed: {result.Error}";

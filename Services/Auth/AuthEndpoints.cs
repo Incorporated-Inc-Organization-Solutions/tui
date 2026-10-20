@@ -13,7 +13,7 @@ public static class AuthEndpoints
             var result = await auth.LoginAsync(email, password);
 
             return result.Success
-                ? Results.LocalRedirect("/auth/login")
+                ? Results.LocalRedirect("/")
                 : Results.LocalRedirect($"/auth/login?error={Uri.EscapeDataString(result.Error ?? "Login failed.")}");
         });
 

@@ -11,7 +11,7 @@
 
     @if (!string.IsNullOrWhiteSpace(Error))
     {
-        <p>@Error</p>
+        <p class="error-message">@Error</p>
     }
 
     <div class="login-container">
@@ -43,7 +43,7 @@
 
     @if (_isLoggedIn)
     {
-        <p>You are logged in as <strong>@_firstName @_lastName</strong> (email: @_email)</p>
+        <p class="success-message">You are logged in as <strong>@_firstName @_lastName</strong> (email: @_email)</p>
         <form method="post" action="/auth/logout">
             <AntiforgeryToken />
             <button type="submit">Logout</button>
