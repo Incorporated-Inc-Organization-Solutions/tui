@@ -5,23 +5,29 @@
 <PageTitle>Register</PageTitle>
 
 <div class="main">
-    <h3>Register</h3>
+    <div class="login-container">
+        <div class="login-header">
+            <h3>Register</h3>
+        </div>
 
-    @if (!string.IsNullOrWhiteSpace(_message))
-    {
-        <p>@_message</p>
-    }
+        @if (!string.IsNullOrWhiteSpace(_message))
+        {
+            <p>@_message</p>
+        }
 
-    <form @onsubmit="OnRegister">
-        <AntiforgeryToken />
-        <input type="text" placeholder="First Name" @bind="_firstName" required />
-        <input type="text" placeholder="Last Name" @bind="_lastName" required />
-        <input type="email" placeholder="Email" @bind="_email" required />
-        <input type="password" placeholder="Password" @bind="_password" required />
-        <button type="submit">Register</button>
-    </form>
+        <form @onsubmit="OnRegister">
+            <AntiforgeryToken />
+            <input type="text" placeholder="First Name" @bind="_firstName" required />
+            <input type="text" placeholder="Last Name" @bind="_lastName" required />
+            <input type="email" placeholder="Email" @bind="_email" required />
+            <input type="password" placeholder="Password" @bind="_password" required />
+            <button type="submit">Register</button>
+        </form>
 
-    <p>Already have an account? <a href="/auth/login">Login</a></p>
+        <div class="register-link">
+            <p>Already have an account? <a href="/auth/login">Login</a></p>
+        </div>
+    </div>
 </div>
 
 @code {
