@@ -1,3 +1,8 @@
 <nav>
     <p>Navbar</p>
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <a href="/admin">Admin</a>
+        </Authorized>
+    </AuthorizeView>
 </nav>
