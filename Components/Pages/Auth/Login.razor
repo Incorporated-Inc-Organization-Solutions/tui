@@ -14,6 +14,11 @@
         <p class="error-message">@Error</p>
     }
 
+    @if (Registered == "true")
+    {
+        <p class="success-message">Registratie geslaagd! Je kunt nu inloggen.</p>
+    }
+
     <div class="login-container">
 
         <div class="login-header">
@@ -54,6 +59,9 @@
 @code {
     [SupplyParameterFromQuery(Name = "error")]
     private string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "registered")]
+    private string? Registered { get; set; }
 
     private bool _isLoggedIn;
     private string? _firstName;

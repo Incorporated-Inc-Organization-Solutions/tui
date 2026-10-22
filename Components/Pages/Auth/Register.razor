@@ -1,6 +1,7 @@
 @page "/auth/register"
 @layout MainLayout
 @inject AuthService AuthService
+@inject NavigationManager Navigation
 
 <PageTitle>Registreren</PageTitle>
 
@@ -58,9 +59,13 @@
 
         var result = await AuthService.RegisterAsync(_firstName, _lastName, _email, _password);
 
-        _registrationSucceeded = result.Success;
-        _message = result.Success
-            ? "Registratie geslaagd! Je kunt nu inloggen."
-            : $"Registratie mislukt: {result.Error}";
+        if (result.Success)
+        {
+            Navigation.NavigateTo("/auth/login?registered=true");
+            return;
+        }
+
+        _registrationSucceeded = false;
+        _message = $"Registratie mislukt: {result.Error}";
     }
 }
