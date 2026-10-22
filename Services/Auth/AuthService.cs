@@ -1,22 +1,22 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using tui.Data;
 using tui.Models;
 
-namespace tui.Services;
+namespace tui.Services.Auth;
 
 public record AuthResult(bool Success, string? Error = null);
 
 public class AuthService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     IHttpContextAccessor httpContextAccessor,
-    IPasswordHasher<User> passwordHasher,
-    AuthenticationStateProvider authStateProvider)
+    IPasswordHasher<User> passwordHasher)
 {
+    private const string AdminEmail = "ADMIN@ADMIN.COM";
+
     public async Task<AuthResult> RegisterAsync(string firstname, string lastname, string email, string password)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
@@ -27,7 +27,14 @@ public class AuthService(
             return new AuthResult(false, "Email already in use.");
         }
 
-        var user = new User { FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow };
+        var user = new User
+        {
+            FirstName = firstname,
+            LastName = lastname,
+            Email = email,
+            PasswordHash = "",
+            CreatedAt = DateTime.UtcNow
+        };
         user.PasswordHash = passwordHasher.HashPassword(user, password);
 
         db.Users.Add(user);
@@ -55,14 +62,20 @@ public class AuthService(
             return new AuthResult(false, "Invalid email or password.");
         }
 
-        Claim[] claims =
-        [
+        var claims = new List<Claim>
+        {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.GivenName, user.FirstName),
             new(ClaimTypes.Surname, user.LastName),
             new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
-        ];
+        };
+
+        // TODO: remove this, this is temporary until we have proper roles
+        if (user.Email == AdminEmail)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
