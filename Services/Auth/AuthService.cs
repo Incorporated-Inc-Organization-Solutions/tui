@@ -29,7 +29,10 @@ public class AuthService(
             return new AuthResult(false, "Email already in use.");
         }
 
-        var user = new User { FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow };
+        var user = new User
+        {
+            FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow
+        };
         user.PasswordHash = passwordHasher.HashPassword(user, password);
 
         db.Users.Add(user);

@@ -31,6 +31,7 @@ builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => { options.LoginPath = "/auth/login"; });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
