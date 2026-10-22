@@ -31,7 +31,11 @@ public class AuthService(
 
         var user = new User
         {
-            FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow
+            FirstName = firstname,
+            LastName = lastname,
+            Email = email,
+            PasswordHash = "",
+            CreatedAt = DateTime.UtcNow
         };
         user.PasswordHash = passwordHasher.HashPassword(user, password);
 
