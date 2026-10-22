@@ -1,38 +1,13 @@
 @inherits LayoutComponentBase
 
 <div class="admin-layout">
-    <header class="admin-navbar">
-        <div class="admin-brand-container">
-            <a class="admin-brand" href="/admin">
-                <span class="brand-mark">V</span>
-                <span>
-                    <strong>VoyageVista</strong>
-                    <small>INTERPLANETARY</small>
-                </span>
-            </a>
-        </div>
 
-        <div class="admin-pages-container">
-            <nav class="admin-nav">
-                <a class="active" href="/admin">Dashboard</a>
-                <a href="/admin/marketing">Marketing <span class="chevron">⌄</span></a>
-                <a href="/admin/sales">Sales <span class="chevron">⌄</span></a>
-                <a href="/admin/customers">Klantenservice <span class="chevron">⌄</span></a>
-                <a href="/admin/products">Producten <span class="chevron">⌄</span></a>
-                <a href="/admin/finance">Financiën <span class="chevron">⌄</span></a>
-                <a href="/admin/innovation">IT &amp; Innovatie</a>
-            </nav>
-        </div>
 
-        <div class="admin-actions-container">
-            <div class="admin-actions">
-                <input type="search" placeholder="Zoeken..." aria-label="Zoeken" />
-                <button type="button" aria-label="Meldingen">♩<span class="notification-dot"></span></button>
-            </div>
-        </div>
-    </header>
+    <Navbar />
 
     <main class="admin-content">
         @Body
     </main>
+
+    <Footer />
 </div>

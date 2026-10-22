@@ -1,5 +1,5 @@
 @page "/auth/login"
-@layout MainLayout
+@layout AuthLayout
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
@@ -8,7 +8,6 @@
 
 <div class="main">
     
-
     @if (!string.IsNullOrWhiteSpace(Error))
     {
         <p class="error-message">@Error</p>
