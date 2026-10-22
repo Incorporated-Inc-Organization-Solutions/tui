@@ -20,6 +20,16 @@ var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={d
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+// Domain services.
+builder.Services.AddScoped<ClientService>();
+builder.Services.AddScoped<TripService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<PricingService>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<TicketService>();
+builder.Services.AddScoped<SlaService>();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
