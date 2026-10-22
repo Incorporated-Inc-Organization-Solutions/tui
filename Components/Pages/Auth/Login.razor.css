@@ -53,7 +53,7 @@
 }
 
 .login-header::after {
-    content: "Welcome back! Login to your account.";
+    content: "Welkom terug! Log in op je account.";
     display: block;
     margin-top: 0.5rem;
     color: #a9bddb;
@@ -82,6 +82,36 @@
     outline: none;
 
     transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.password-input {
+    position: relative;
+}
+
+.password-input input {
+    padding-right: 48px;
+}
+
+.login-container .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin: 0;
+    transform: translateY(-50%);
+    background: transparent;
+    color: #a9bddb;
+    border: none;
+    font-size: 1.15rem;
+    cursor: pointer;
+}
+
+.login-container .password-toggle:hover {
+    color: #26bbff;
+    box-shadow: none;
+    transform: translateY(-50%);
 }
 
 .login-container input::placeholder {
