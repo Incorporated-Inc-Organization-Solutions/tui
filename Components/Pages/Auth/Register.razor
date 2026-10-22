@@ -22,8 +22,14 @@
             <input type="text" placeholder="Voornaam" @bind="_firstName" required />
             <input type="text" placeholder="Achternaam" @bind="_lastName" required />
             <input type="email" placeholder="E-mailadres" @bind="_email" required />
-            <input type="password" placeholder="Wachtwoord (minimaal 16 tekens)" @bind="_password" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
-            <input type="password" placeholder="Wachtwoord bevestigen" @bind="_confirmPassword" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
+            <div class="password-input">
+                <input type="@(_showPassword ? "text" : "password")" placeholder="Wachtwoord (minimaal 16 tekens)" @bind="_password" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
+                <button type="button" class="password-toggle" @onclick="() => _showPassword = !_showPassword" aria-label="@(_showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")" title="@(_showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")">@( _showPassword ? "◉" : "◌" )</button>
+            </div>
+            <div class="password-input">
+                <input type="@(_showConfirmPassword ? "text" : "password")" placeholder="Wachtwoord bevestigen" @bind="_confirmPassword" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
+                <button type="button" class="password-toggle" @onclick="() => _showConfirmPassword = !_showConfirmPassword" aria-label="@(_showConfirmPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")" title="@(_showConfirmPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")">@( _showConfirmPassword ? "◉" : "◌" )</button>
+            </div>
             <button type="submit">Registreren</button>
         </form>
 
@@ -41,6 +47,8 @@
     private string _confirmPassword = string.Empty;
     private string? _message;
     private bool _registrationSucceeded;
+    private bool _showPassword;
+    private bool _showConfirmPassword;
     private static readonly Regex PasswordRegex = new(@"^(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}$", RegexOptions.CultureInvariant);
 
     private async Task OnRegister()

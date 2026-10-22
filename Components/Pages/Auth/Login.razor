@@ -29,7 +29,10 @@
         <form method="post" action="/auth/login">
             <AntiforgeryToken />
             <input type="email" name="email" placeholder="E-mailadres" required />
-            <input type="password" name="password" placeholder="Wachtwoord" required />
+            <div class="password-input">
+                <input type="@(_showPassword ? "text" : "password")" name="password" placeholder="Wachtwoord" required />
+                <button type="button" class="password-toggle" @onclick="() => _showPassword = !_showPassword" aria-label="@(_showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")" title="@(_showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen")">@( _showPassword ? "◉" : "◌" )</button>
+            </div>
             <button type="submit">Inloggen</button>
         </form>
 
@@ -67,6 +70,7 @@
     private string? _firstName;
     private string? _lastName;
     private string? _email;
+    private bool _showPassword;
 
     protected override async Task OnInitializedAsync()
     {
