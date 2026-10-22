@@ -1,21 +1,19 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using tui.Data;
 using tui.Models;
 
-namespace tui.Services;
+namespace tui.Services.Auth;
 
 public record AuthResult(bool Success, string? Error = null);
 
 public class AuthService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     IHttpContextAccessor httpContextAccessor,
-    IPasswordHasher<User> passwordHasher,
-    AuthenticationStateProvider authStateProvider)
+    IPasswordHasher<User> passwordHasher)
 {
     private const string AdminEmail = "ADMIN@ADMIN.COM";
 
@@ -73,6 +71,7 @@ public class AuthService(
             new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
         };
 
+        // TODO: remove this, this is temporary until we have proper roles
         if (user.Email == AdminEmail)
         {
             claims.Add(new Claim(ClaimTypes.Role, "Admin"));
