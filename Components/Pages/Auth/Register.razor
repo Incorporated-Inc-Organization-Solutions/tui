@@ -1,5 +1,6 @@
 @page "/auth/register"
 @layout MainLayout
+@using System.Text.RegularExpressions
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
@@ -21,8 +22,8 @@
             <input type="text" placeholder="Voornaam" @bind="_firstName" required />
             <input type="text" placeholder="Achternaam" @bind="_lastName" required />
             <input type="email" placeholder="E-mailadres" @bind="_email" required />
-            <input type="password" placeholder="Wachtwoord (minimaal 16 tekens)" @bind="_password" minlength="16" required />
-            <input type="password" placeholder="Wachtwoord bevestigen" @bind="_confirmPassword" minlength="16" required />
+            <input type="password" placeholder="Wachtwoord (minimaal 16 tekens)" @bind="_password" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
+            <input type="password" placeholder="Wachtwoord bevestigen" @bind="_confirmPassword" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}" title="Gebruik minimaal 16 tekens, minstens één hoofdletter en één speciaal teken, zonder spaties." required />
             <button type="submit">Registreren</button>
         </form>
 
@@ -40,15 +41,17 @@
     private string _confirmPassword = string.Empty;
     private string? _message;
     private bool _registrationSucceeded;
+    private static readonly Regex PasswordRegex = new(@"^(?=.*[A-Z])(?=.*[^A-Za-z0-9\s])\S{16,}$", RegexOptions.CultureInvariant);
 
     private async Task OnRegister()
     {
-        if (_password.Length < 16)
+        if (!PasswordRegex.IsMatch(_password))
         {
             _registrationSucceeded = false;
-            _message = "Het wachtwoord moet minimaal 16 tekens lang zijn.";
+            _message = "Het wachtwoord moet minimaal 16 tekens bevatten, minstens één hoofdletter en één speciaal teken, zonder spaties.";
             return;
         }
+
 
         if (_password != _confirmPassword)
         {
