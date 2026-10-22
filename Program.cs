@@ -31,6 +31,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => { options.LoginPath = "/auth/login"; });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())
@@ -51,7 +53,7 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
