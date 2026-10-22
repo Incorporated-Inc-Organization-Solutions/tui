@@ -32,16 +32,11 @@
     text-decoration: none;
 }
 
-.brand-mark {
-    display: grid;
-    width: 34px;
-    height: 34px;
-    place-items: center;
-    border: 1px solid #dbe3ee;
-    border-radius: 50%;
-    color: #1c2f50;
-    font-size: 1.1rem;
-    font-weight: 700;
+.brand-logo {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
 }
 
 .admin-brand strong,
