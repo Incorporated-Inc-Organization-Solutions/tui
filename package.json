@@ -1,0 +1,12 @@
+{
+  "name": "tui",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i ./wwwroot/app.css -o ./wwwroot/app.generated.css --minify",
+    "css:watch": "tailwindcss -i ./wwwroot/app.css -o ./wwwroot/app.generated.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
