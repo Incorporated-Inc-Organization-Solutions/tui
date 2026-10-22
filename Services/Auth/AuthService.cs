@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using tui.Data;
@@ -14,23 +13,22 @@ public record AuthResult(bool Success, string? Error = null);
 public class AuthService(
     IDbContextFactory<ApplicationDbContext> dbFactory,
     IHttpContextAccessor httpContextAccessor,
-    IPasswordHasher<User> passwordHasher,
-    AuthenticationStateProvider authStateProvider)
+    IPasswordHasher<AppUser> passwordHasher)
 {
     public async Task<AuthResult> RegisterAsync(string firstname, string lastname, string email, string password)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
         email = email.Trim().ToUpperInvariant();
 
-        if (await db.Users.AnyAsync(u => u.Email == email))
+        if (await db.AppUsers.AnyAsync(u => u.Email == email))
         {
             return new AuthResult(false, "Email already in use.");
         }
 
-        var user = new User { FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow };
+        var user = new AppUser { FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow };
         user.PasswordHash = passwordHasher.HashPassword(user, password);
 
-        db.Users.Add(user);
+        db.AppUsers.Add(user);
         await db.SaveChangesAsync();
 
         return new AuthResult(true);
@@ -41,7 +39,7 @@ public class AuthService(
         await using var db = await dbFactory.CreateDbContextAsync();
         email = email.Trim().ToUpperInvariant();
 
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email);
+        var user = await db.AppUsers.SingleOrDefaultAsync(u => u.Email == email);
 
         if (user is null)
         {
@@ -57,7 +55,7 @@ public class AuthService(
 
         Claim[] claims =
         [
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.GivenName, user.FirstName),
             new(ClaimTypes.Surname, user.LastName),
