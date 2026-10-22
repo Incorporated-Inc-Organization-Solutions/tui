@@ -36,7 +36,7 @@
 }
 
 .login-header::after {
-    content: "Create your account.";
+    content: "Maak je account aan.";
     display: block;
     margin-top: 0.5rem;
     color: #a9bddb;

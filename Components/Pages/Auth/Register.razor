@@ -2,12 +2,12 @@
 @layout MainLayout
 @inject AuthService AuthService
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Registreren</PageTitle>
 
 <div class="main">
     <div class="login-container">
         <div class="login-header">
-            <h3>Register</h3>
+            <h3>Registreren</h3>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(_message))
@@ -17,16 +17,16 @@
 
         <form @onsubmit="OnRegister">
             <AntiforgeryToken />
-            <input type="text" placeholder="First Name" @bind="_firstName" required />
-            <input type="text" placeholder="Last Name" @bind="_lastName" required />
-            <input type="email" placeholder="Email" @bind="_email" required />
-            <input type="password" placeholder="Password (at least 8 characters)" @bind="_password" minlength="8" required />
-            <input type="password" placeholder="Confirm password" @bind="_confirmPassword" minlength="8" required />
-            <button type="submit">Register</button>
+            <input type="text" placeholder="Voornaam" @bind="_firstName" required />
+            <input type="text" placeholder="Achternaam" @bind="_lastName" required />
+            <input type="email" placeholder="E-mailadres" @bind="_email" required />
+            <input type="password" placeholder="Wachtwoord (minimaal 8 tekens)" @bind="_password" minlength="8" required />
+            <input type="password" placeholder="Wachtwoord bevestigen" @bind="_confirmPassword" minlength="8" required />
+            <button type="submit">Registreren</button>
         </form>
 
         <div class="register-link">
-            <p>Already have an account? <a href="/auth/login">Login</a></p>
+            <p>Heb je al een account? <a href="/auth/login">Inloggen</a></p>
         </div>
     </div>
 </div>
@@ -45,14 +45,14 @@
         if (_password.Length < 8)
         {
             _registrationSucceeded = false;
-            _message = "Password must be at least 8 characters long.";
+            _message = "Het wachtwoord moet minimaal 8 tekens lang zijn.";
             return;
         }
 
         if (_password != _confirmPassword)
         {
             _registrationSucceeded = false;
-            _message = "The passwords do not match.";
+            _message = "De wachtwoorden komen niet overeen.";
             return;
         }
 
@@ -60,7 +60,7 @@
 
         _registrationSucceeded = result.Success;
         _message = result.Success
-            ? "Registration successful! You can now log in."
-            : $"Registration failed: {result.Error}";
+            ? "Registratie geslaagd! Je kunt nu inloggen."
+            : $"Registratie mislukt: {result.Error}";
     }
 }

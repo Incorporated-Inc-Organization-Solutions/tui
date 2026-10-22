@@ -14,7 +14,7 @@ public static class AuthEndpoints
 
             return result.Success
                 ? Results.LocalRedirect("/")
-                : Results.LocalRedirect($"/auth/login?error={Uri.EscapeDataString(result.Error ?? "Login failed.")}");
+                : Results.LocalRedirect($"/auth/login?error={Uri.EscapeDataString(result.Error ?? "Inloggen mislukt.")}");
         });
 
         group.MapPost("/logout", async (AuthService auth) =>

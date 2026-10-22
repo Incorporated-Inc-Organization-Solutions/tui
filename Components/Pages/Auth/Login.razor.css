@@ -53,7 +53,7 @@
 }
 
 .login-header::after {
-    content: "Welcome back! Login to your account.";
+    content: "Welkom terug! Log in op je account.";
     display: block;
     margin-top: 0.5rem;
     color: #a9bddb;

@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Login</PageTitle>
+<PageTitle>Inloggen</PageTitle>
 
 <div class="main">
     
@@ -17,19 +17,19 @@
     <div class="login-container">
 
         <div class="login-header">
-            <h3>Login</h3>
+            <h3>Inloggen</h3>
         </div>
 
 
         <form method="post" action="/auth/login">
             <AntiforgeryToken />
-            <input type="email" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Password" required />
-            <button type="submit">Login</button>
+            <input type="email" name="email" placeholder="E-mailadres" required />
+            <input type="password" name="password" placeholder="Wachtwoord" required />
+            <button type="submit">Inloggen</button>
         </form>
 
         <div class="register-link">
-            <p>Don't have an account? <a href="/auth/register">Register</a></p>
+            <p>Heb je nog geen account? <a href="/auth/register">Registreren</a></p>
         </div>
         
     </div>
@@ -43,10 +43,10 @@
 
     @if (_isLoggedIn)
     {
-        <p class="success-message">You are logged in as <strong>@_firstName @_lastName</strong> (email: @_email)</p>
+        <p class="success-message">Je bent ingelogd als <strong>@_firstName @_lastName</strong> (e-mailadres: @_email)</p>
         <form method="post" action="/auth/logout">
             <AntiforgeryToken />
-            <button type="submit">Logout</button>
+            <button type="submit">Uitloggen</button>
         </form>
     }
 </div>

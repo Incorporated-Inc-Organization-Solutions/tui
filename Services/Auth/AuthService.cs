@@ -24,7 +24,7 @@ public class AuthService(
 
         if (await db.AppUsers.AnyAsync(u => u.Email == email))
         {
-            return new AuthResult(false, "Email already in use.");
+            return new AuthResult(false, "Dit e-mailadres is al in gebruik.");
         }
 
         var user = new AppUser { FirstName = firstname, LastName = lastname, Email = email, PasswordHash = "", CreatedAt = DateTime.UtcNow };
@@ -45,14 +45,14 @@ public class AuthService(
 
         if (user is null)
         {
-            return new AuthResult(false, "Invalid email or password.");
+            return new AuthResult(false, "Ongeldig e-mailadres of ongeldig wachtwoord.");
         }
 
         var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
         if (result == PasswordVerificationResult.Failed)
         {
-            return new AuthResult(false, "Invalid email or password.");
+            return new AuthResult(false, "Ongeldig e-mailadres of ongeldig wachtwoord.");
         }
 
         var claims = new List<Claim>
